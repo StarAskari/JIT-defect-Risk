@@ -1,0 +1,27 @@
+================================================================================
+PREPROCESSING REPORT
+Generated: 2025-12-17 16:37:50
+================================================================================
+
+1. Original Dataset
+ total commits: 3797
+bug introducing: 1508(39.72)
+Clean: 2289 (60.28%)
+Date range: 2024-11-05 00:19:32+00:00 to 2025-12-16 12:13:37+00:00
+
+2. DATA SPLITS
+Train: 2657 commits (70.0%)
+Val: 570 commits (15.0%)
+Test: 570 commits (15.0%)
+
+3. MESSAGE STATISTICS (After Cleaning)
+Train: Avg 319 chars, 39 words
+Val: Avg 333 chars, 35 words
+Test: Avg 450 chars, 53 words
+
+4. LABEL DISTRIBUTION
+   Train: 1060 bugs (39.89%)
+   Val: 226 bugs (39.65%)
+   Test: 222 bugs (38.95%)
+
+================================================================================
