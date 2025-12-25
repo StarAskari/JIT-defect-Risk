@@ -1,12 +1,12 @@
 import torch
-import torch.nn
+import torch.nn as nn
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support, classification_report
 from sklearn.utils.class_weight import compute_class_weight
 import numpy as np
 from tqdm import tqdm
 import time
 
-class JITDefectionTrainer:
+class JITDefectTrainer:
     def __init__(self, model, device, learning_rate = 2e-5, weight_decay = 0.01):
         self.model = model.to(device)
         self.device = device
@@ -15,11 +15,14 @@ class JITDefectionTrainer:
             lr = learning_rate,
             weight_decay=weight_decay
         )
+        self.best_val_loss = float('inf')
+        self.best_val_f1 = 0.0      
         #for tracking best model
         self.train_losses =[]
         self.val_losses=[]
         self.val_accuracies=[]
         self.val_f1_scores = []
+
     
     def compute_class_weights(self, train_labels):
         class_weights = compute_class_weight(
@@ -29,7 +32,7 @@ class JITDefectionTrainer:
         )
         return torch.tensor(class_weights, dtype=torch.float).to(self.device)
     
-    def train_epoc(self, train_loader, class_weights=None):
+    def train_epoch(self, train_loader, class_weights=None):
         self.model.train()
         total_loss = 0
         if class_weights is not None:
@@ -40,13 +43,13 @@ class JITDefectionTrainer:
         progress_bar = tqdm(train_loader, desc = "Training")
         for batch in progress_bar:
             input_ids = batch['input_ids'].to(self.device)
-            attention_mask = batch['aatention_mask'].to(self.device)
+            attention_mask = batch['attention_mask'].to(self.device)
             labels = batch['label'].to(self.device)
-            self.optimizer.zero_gard()
+            self.optimizer.zero_grad()
             output = self.model(input_ids, attention_mask)
-            loss = criterion(outputs, labels)
+            loss = criterion(output, labels)
             loss.backward()
-            torch.nn.utils.clip_gard_norm_(self.model.parameters(), max_norm=1.0)
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
             self.optimizer.step()
             total_loss += loss.item()
             progress_bar.set_postfix({'loss' :f'{loss.item():.4f}'})
@@ -57,7 +60,7 @@ class JITDefectionTrainer:
     def evaluate(self, data_loader):
         self.model.eval()
         total_loss =0
-        all_prediction = []
+        all_predictions = []
         all_labels =[]
         all_probabilities =[]
 
@@ -71,13 +74,13 @@ class JITDefectionTrainer:
                 labels = batch['label'].to(self.device)
                 
                 outputs = self.model(input_ids, attention_mask)
-                loss = batch['label'].to(self.device)
+                loss = criterion(outputs, labels)
                 probabilities = torch.softmax(outputs, dim =1 )
                 predictions = torch.argmax(probabilities, dim=1)
 
                 total_loss +=loss.item()
-                all_predictions.extend(predictions.cpu().numpu())
-                all_labels.extend(labels.cpu().numpy)
+                all_predictions.extend(predictions.cpu().numpy())
+                all_labels.extend(labels.cpu().numpy())
                 all_probabilities.extend(probabilities[:,1].cpu().numpy())
         # Calculate metrics
         avg_loss = total_loss / len(data_loader)

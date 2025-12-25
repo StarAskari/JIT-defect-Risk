@@ -1,9 +1,9 @@
 import torch
-from torch.utils.data import dataset, dataloader
+from torch.utils.data import Dataset, DataLoader
 import pandas as pd
 from transformers import DistilBertTokenizer
 
-class commitDataset(dataset):
+class commitDataset(Dataset):
     def __init__(self, csv_files=None, dataframe=None, tokenizer_name='distilbert-base-uncased',
                  max_length= 128, message_column='clean_message', label_column='label'):
         if dataframe is not None:
@@ -34,12 +34,12 @@ class commitDataset(dataset):
         #tokenize
         encoding=self.tokenizer(
             message,
-            add_special_token = True,
+            add_special_tokens = True,
             max_length = self.max_length,
             padding = 'max_length',
             truncation = True,
             return_attention_mask = True,
-            return_turnsor = 'pt'
+            return_tensors = 'pt'
         )
 
         return {
@@ -56,7 +56,7 @@ class commitDataset(dataset):
         unique, counts =torch.unique(torch.tensor(self.labels), return_counts=True)
         return dict(zip(unique.tolist(), counts.tolist()))
     
-def create_date_loader(train_csv, val_csv, test_csv, batch_size = 16, max_length = 128):
+def create_date_loaders(train_csv, val_csv, test_csv, batch_size = 16, max_length = 128):
     print("=" * 80)
     print("Creating Data Loaders")
     print("=" * 80)
@@ -74,9 +74,9 @@ def create_date_loader(train_csv, val_csv, test_csv, batch_size = 16, max_length
     test_dataset = commitDataset(csv_files=test_csv, max_length=max_length)
     print(f"class distribution :{test_dataset.get_class_count()}")
 
-    train_loader = dataloader(train_dataset, batch_size = batch_size, shuffle=True, num_workers=0)
-    val_loader = dataloader(val_dataset, batch_size = batch_size , shuffle = False, num_workers=0)
-    test_loader = dataloader(test_dataset, batch_size = batch_size , shuffle = False, num_workers=0)
+    train_loader = DataLoader(train_dataset, batch_size = batch_size, shuffle=True, num_workers=0)
+    val_loader = DataLoader(val_dataset, batch_size = batch_size , shuffle = False, num_workers=0)
+    test_loader = DataLoader(test_dataset, batch_size = batch_size , shuffle = False, num_workers=0)
 
     print(f"\n✓ Created data loaders:")
     print(f"  Train: {len(train_loader)} batches")
@@ -99,20 +99,20 @@ if __name__ == "__main__":
         'label': [1, 0, 0]
     })
     dataset = commitDataset(dataframe=test_data, max_length=128)
-    print("n1\. first item in dataset:")
+    print("\n1. first item in dataset:")
     item = dataset[0]
     print(f"input IDs shape: {item['input_ids'].shape}")
-    print(f"attention mask shape: {item['attention-mask'].shape}")
+    print(f"attention mask shape: {item['attention_mask'].shape}")
     print(f"Label: {item['label']}")
 
     # Decode to see tokens
-    print("n2\. decode tokens:")
+    print("\n2. decode tokens:")
     tokens =dataset.tokenizer.convert_ids_to_tokens(item['input_ids'])
     print(f"Tokens: {tokens[:20]}...") #first 20 tokens
 
     # Create data loader
     print("\n3. Testing DataLoader:")
-    loader = dataloader(dataset, batch_size=2, shuffel=True)
+    loader = DataLoader(dataset, batch_size=2, shuffle=True)
 
     batch = next(iter(loader))
     print(f"   Batch input_ids shape: {batch['input_ids'].shape}")

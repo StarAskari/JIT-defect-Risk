@@ -1,0 +1,47 @@
+================================================================================
+JIT DEFECT PREDICTION - TRAINING RESULTS
+Generated: 2025-12-25 15:12:03
+================================================================================
+
+CONFIGURATION:
+  tarin_csv: data/processed/train.csv
+  val_csv: data/processed/val.csv
+  test_csv: data/processed/test.csv
+  max_length: 128
+  dropout: 0.3
+  batch_size: 16
+  num_epochs: 3
+  learning_rate: 2e-05
+  weight_decay: 0.01
+  model_save_path: outputs/models/best_model.pth
+  results_path: outputs/results/
+
+================================================================================
+FINAL TEST RESULTS:
+================================================================================
+Accuracy:  0.7474
+Precision: 0.7191
+Recall:    0.5766
+F1-Score:  0.6400
+
+================================================================================
+TRAINING HISTORY:
+================================================================================
+
+Epoch 1:
+  Train Loss: 0.6529
+  Val Loss:   0.5287
+  Val Acc:    0.7789
+  Val F1:     0.6786
+
+Epoch 2:
+  Train Loss: 0.5720
+  Val Loss:   0.4876
+  Val Acc:    0.7719
+  Val F1:     0.6429
+
+Epoch 3:
+  Train Loss: 0.4922
+  Val Loss:   0.4785
+  Val Acc:    0.7860
+  Val F1:     0.6703
